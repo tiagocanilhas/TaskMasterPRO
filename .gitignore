@@ -27,3 +27,6 @@ Desktop.ini
 
 # macOS OS files
 .DS_Store
+
+# Dia
+*.dia~
