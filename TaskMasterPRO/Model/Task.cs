@@ -5,13 +5,13 @@
         public int Id { get; init; }
         public DateTime CreationTime { get; init; }
 
-        public string Title { get; init; }
-        public string Description { get; init; }
-        public DateTime Deadline { get; init; }
-        public Boolean IsCompleted { get; init; }
-        public Priority Priority { get; init; }
-        public int CategoryId { get; init; }
-        public Category Category { get; init; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public DateTime Deadline { get; set; }
+        public bool IsCompleted { get; set; }
+        public Priority Priority { get; set; }
+        public int CategoryId { get; set; }
+        public Category Category { get; set; }
     }
 
     public enum Priority 

@@ -3,14 +3,19 @@ using TaskMasterPRO.Model;
 
 namespace TaskMasterPRO.Data
 {
-    public class TaskMasterPROContext : DbContext
+    public class TaskMasterPROContext(
+        DbContextOptions<TaskMasterPROContext> options
+        ) : DbContext(options)
     {
-        public DbSet<Model.Task> Tasks { get; set; }
+        public DbSet<Model.Task> Task { get; set; }
         public DbSet<Category> Category { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source=tasks.db");
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlite("Data Source=tasks.db");
+            }
         }
     }
 }
