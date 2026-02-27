@@ -73,7 +73,7 @@ namespace TaskMasterPRO.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Tasks");
+                    b.ToTable("Task");
                 });
 
             modelBuilder.Entity("TaskMasterPRO.Model.Task", b =>

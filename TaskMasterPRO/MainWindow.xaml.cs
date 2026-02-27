@@ -1,27 +1,41 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using TaskMasterPRO.Data;
 using TaskMasterPRO.Model;
+using TaskMasterPRO.Repository;
+using TaskMasterPRO.Services;
+using TaskMasterPRO.ViewModel;
 
 namespace TaskMasterPRO
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
         {
             InitializeComponent();
+
+            // Setup DbContext
+            DbContextOptionsBuilder<TaskMasterPROContext> optionsBuilder = new(); 
+            optionsBuilder.UseSqlite(DatabaseConfig.GetConnectionString());
+            TaskMasterPROContext context = new(optionsBuilder.Options); 
+
+            // Domains
+            CategoryDomain categoryDomain = new();
+            TaskDomain taskDomain = new();
+
+            // Repositories
+            CategoryRepository categoryRepository = new(context);
+            TaskRepository taskRepository = new(context);
+
+            // Services
+            CategoryServices categoryServices = new(categoryDomain, categoryRepository);
+            TaskServices taskServices = new(taskDomain, taskRepository);
+
+            // ViewModel
+            MainViewModel vm = new(categoryServices, taskServices);
+
+            DataContext = vm;
+            vm.LoadTasksAsync();
         }
     };
 

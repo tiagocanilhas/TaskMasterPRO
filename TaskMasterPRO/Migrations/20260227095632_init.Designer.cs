@@ -11,8 +11,8 @@ using TaskMasterPRO.Data;
 namespace TaskMasterPRO.Migrations
 {
     [DbContext(typeof(TaskMasterPROContext))]
-    [Migration("20260223102726_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260227095632_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -76,7 +76,7 @@ namespace TaskMasterPRO.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Tasks");
+                    b.ToTable("Task");
                 });
 
             modelBuilder.Entity("TaskMasterPRO.Model.Task", b =>

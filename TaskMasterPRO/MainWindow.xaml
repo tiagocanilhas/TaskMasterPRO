@@ -3,10 +3,62 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TaskMasterPRO"
+        xmlns:local="clr-namespace:TaskMasterPRO" xmlns:viewmodel="clr-namespace:TaskMasterPRO.ViewModel" d:DataContext="{d:DesignInstance Type=viewmodel:MainViewModel}"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="250" />
+        </Grid.ColumnDefinitions>
 
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Task List" FontSize="16" FontWeight="Bold" />
+            
+            <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding Tasks}"
+                  AutoGenerateColumns="True" 
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  IsReadOnly="True" 
+             />
+        </Grid>
+
+        <Border Grid.Column="1" Background="LightGray">
+            <StackPanel>
+                <TextBlock Text="Add Task" FontSize="16" FontWeight="Bold"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="Title" />
+                    <TextBox Grid.Column="1" Text="{Binding TaskToAdd.Title, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="Priority" />
+                    <ComboBox Grid.Column="1" Text="{Binding TaskToAdd.Priority, UpdateSourceTrigger=PropertyChanged}">"
+                        <ComboBoxItem Content="Low" />
+                        <ComboBoxItem Content="Medium" />
+                        <ComboBoxItem Content="High" />
+                    </ComboBox>
+                </Grid>
+
+                <Button Content="Add Task" Command="{Binding AddTaskCommand}"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>
