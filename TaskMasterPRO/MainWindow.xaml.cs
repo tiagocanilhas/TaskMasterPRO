@@ -13,29 +13,6 @@ namespace TaskMasterPRO
         public MainWindow()
         {
             InitializeComponent();
-
-            // Setup DbContext
-            DbContextOptionsBuilder<TaskMasterPROContext> optionsBuilder = new(); 
-            optionsBuilder.UseSqlite(DatabaseConfig.GetConnectionString());
-            TaskMasterPROContext context = new(optionsBuilder.Options); 
-
-            // Domains
-            CategoryDomain categoryDomain = new();
-            TaskDomain taskDomain = new();
-
-            // Repositories
-            CategoryRepository categoryRepository = new(context);
-            TaskRepository taskRepository = new(context);
-
-            // Services
-            CategoryServices categoryServices = new(categoryDomain, categoryRepository);
-            TaskServices taskServices = new(taskDomain, taskRepository);
-
-            // ViewModel
-            MainViewModel vm = new(categoryServices, taskServices);
-
-            DataContext = vm;
-            vm.LoadTasksAsync();
         }
     };
 

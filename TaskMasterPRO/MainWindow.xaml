@@ -3,7 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TaskMasterPRO" xmlns:viewmodel="clr-namespace:TaskMasterPRO.ViewModel" d:DataContext="{d:DesignInstance Type=viewmodel:MainViewModel}"
+        xmlns:local="clr-namespace:TaskMasterPRO" 
+        xmlns:models="clr-namespace:TaskMasterPRO.Model"
+        xmlns:ext="clr-namespace:TaskMasterPRO.Extensions"
+        xmlns:viewmodel="clr-namespace:TaskMasterPRO.ViewModel" 
+        d:DataContext="{d:DesignInstance Type=viewmodel:MainViewModel}"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
@@ -50,11 +54,11 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Text="Priority" />
-                    <ComboBox Grid.Column="1" Text="{Binding TaskToAdd.Priority, UpdateSourceTrigger=PropertyChanged}">"
-                        <ComboBoxItem Content="Low" />
-                        <ComboBoxItem Content="Medium" />
-                        <ComboBoxItem Content="High" />
-                    </ComboBox>
+                    <ComboBox 
+                        Grid.Column="1" 
+                        Text="{Binding TaskToAdd.Priority, UpdateSourceTrigger=PropertyChanged}" 
+                        ItemsSource="{Binding Source={ext:EnumBinding {x:Type models:Priority}}}"
+                        />
                 </Grid>
 
                 <Button Content="Add Task" Command="{Binding AddTaskCommand}"/>

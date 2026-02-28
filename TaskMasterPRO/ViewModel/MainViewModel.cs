@@ -58,7 +58,5 @@ namespace TaskMasterPRO.ViewModel
         }
 
         private bool CanAddTask() => !string.IsNullOrWhiteSpace(TaskToAdd.Title);
-        
-
     }
 }
