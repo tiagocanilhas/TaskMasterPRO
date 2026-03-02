@@ -1,0 +1,50 @@
+﻿<UserControl x:Class="TaskMasterPRO.View.Components.TaskCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TaskMasterPRO.View.Components"
+             xmlns:models="clr-namespace:TaskMasterPRO.Model"
+             d:DataContext="{d:DesignInstance Type=models:Task}"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Border Background="LightYellow" BorderBrush="Black" BorderThickness="1" Width="180" Height="130">
+            <StackPanel>
+                <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="14" />
+                <TextBlock Text="{Binding Description}" />
+                
+                <Separator  />
+
+                <TextBlock Text="{Binding Category.Name, StringFormat='Category: {0}'}" />
+                <TextBlock Text="{Binding Priority, StringFormat='Priority: {0}'}" />
+                <TextBlock Text="{Binding Deadline, StringFormat='Deadline: {0:dd/MMM/yy}'}" />
+
+                <CheckBox 
+                    IsChecked="{Binding IsCompleted}"
+                    Content="Is It Completed?"
+                    Command="{Binding OnIsCompletedClickCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{Binding}"
+                    />
+
+                <Button 
+                    HorizontalAlignment="Left" 
+                    Background="Transparent" 
+                    BorderThickness="0" 
+                    Cursor="Hand" 
+                    Height="18"
+                    Command="{Binding OnDeleteClickCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{Binding}"
+                    >
+                    
+                    <Path 
+                        Fill="#FF5252"
+                        Stretch="Uniform"
+                        Height="16"
+                        Data="{StaticResource IconTrash}" 
+                        />
+                </Button>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

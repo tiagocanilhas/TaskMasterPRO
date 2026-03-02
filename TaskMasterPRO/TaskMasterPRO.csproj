@@ -12,7 +12,6 @@
     <Folder Include="Migrations\" />
     <Folder Include="Model\" />
     <Folder Include="ViewModel\" />
-    <Folder Include="View\" />
   </ItemGroup>
 
   <ItemGroup>
