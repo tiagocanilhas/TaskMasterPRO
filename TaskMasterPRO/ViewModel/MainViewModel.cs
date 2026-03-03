@@ -1,4 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Windows.Data;
 using TaskMasterPRO.Model;
 using TaskMasterPRO.Services.Interfaces;
 using Task = System.Threading.Tasks.Task;
@@ -12,9 +14,29 @@ namespace TaskMasterPRO.ViewModel
         ) : BaseViewModel(dialogServices)
     {
         public ObservableCollection<Model.Task> Tasks { get; set; } = new();
+        public ICollectionView TasksView { get; private set; }
+
         public ObservableCollection<Category> Categories { get; set; } = new();
 
-        public async Task LoadTasksAsync()
+        public FilterPanelViewModel FilterPanel { get; } = new();
+
+        /*
+         * Load Content
+         */
+
+        public async Task LoadContent()
+        {
+            await LoadTasksAsync();
+            await LoadCategoriesAsync();
+            SetPriorityFilters();
+
+            TasksView = CollectionViewSource.GetDefaultView(Tasks);
+            TasksView.Filter = FilterTaskPredicate;
+            FilterPanel.FiltersChanged -= () => TasksView.Refresh();
+            FilterPanel.FiltersChanged += () => TasksView.Refresh();
+        }
+
+        private async Task LoadTasksAsync()
         {
             var data = await taskServices.GetAllAsync();
             Tasks.Clear();
@@ -24,15 +46,74 @@ namespace TaskMasterPRO.ViewModel
             }
         }
 
-        public async Task LoadCategoriesAsync()
+        private bool FilterTaskPredicate(object obj)
+        {
+            if (obj is not Model.Task task)
+                return false;
+
+            var selectedCategories = FilterPanel.CategoryFilters.Where(f => f.IsSelected).ToList();
+
+            bool categoryMatch = 
+                selectedCategories.Any(f => f.DisplayName == "All") ||
+                selectedCategories.Any(f => f.Item?.Id == task.CategoryId);
+
+            var selectedPriorities = FilterPanel.PriorityFilters.Where(f => f.IsSelected).ToList();
+
+            bool priorityMatch = 
+                selectedPriorities.Any(f => f.DisplayName == "All") ||
+                selectedPriorities.Any(f => f.Item == task.Priority);
+
+            return categoryMatch && priorityMatch;
+        }
+
+        private async Task LoadCategoriesAsync()
         {
             var data = await categoryServices.GetAllAsync();
             Categories.Clear();
+
+            FilterPanel.CategoryFilters.Clear();
+            FilterPanel.CategoryFilters.Add(new FilterItem<Category>
+            {
+                DisplayName = "All",
+                IsSelected = true
+            });
+
             foreach (var category in data)
             {
                 Categories.Add(category);
+
+                FilterPanel.CategoryFilters.Add(new FilterItem<Category>
+                {
+                    DisplayName = category.Name,
+                    Item = category,
+                    IsSelected = false
+                });
             }
         }
+
+        private void SetPriorityFilters()
+        {
+            FilterPanel.PriorityFilters.Clear();
+
+            FilterPanel.PriorityFilters.Add(new FilterItem<Priority>
+            {
+                DisplayName = "All",
+                IsSelected = true,
+                Item = default
+            });
+
+            foreach (Priority p in Enum.GetValues(typeof(Priority)))
+            {
+                FilterPanel.PriorityFilters.Add(new FilterItem<Priority>
+                {
+                    DisplayName = p.ToString(),
+                    IsSelected = false,
+                    Item = p
+                });
+            }
+
+        }
+
         /*
          * Add Task Command
          */
@@ -72,7 +153,7 @@ namespace TaskMasterPRO.ViewModel
             );
         }
 
-        private bool CanAddTask()   
+        private bool CanAddTask()
         {
             bool hasValidTitle = !string.IsNullOrWhiteSpace(TaskToAdd.Title);
             bool hasValidDeadline = TaskToAdd.Deadline > DateTime.Now;
@@ -87,7 +168,7 @@ namespace TaskMasterPRO.ViewModel
          */
 
         public RelayCommand ToggleTaskIsCompletedCommand => new(
-            async obj => await (obj is Model.Task task ? ToggleTaskIsCompleted(task) : Task.CompletedTask), 
+            async obj => await (obj is Model.Task task ? ToggleTaskIsCompleted(task) : Task.CompletedTask),
             obj => CanToggleTaskIsCompleted(obj as Model.Task)
         );
 
@@ -120,7 +201,7 @@ namespace TaskMasterPRO.ViewModel
          */
 
         public RelayCommand DeleteTaskCommand => new(
-            async obj => await (obj is Model.Task task ? DeleteTask(task) : Task.CompletedTask), 
+            async obj => await (obj is Model.Task task ? DeleteTask(task) : Task.CompletedTask),
             obj => CanDeleteTask(obj as Model.Task)
             );
 

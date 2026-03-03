@@ -42,8 +42,7 @@ namespace TaskMasterPRO
             MainWindow mainWindow = new();
             mainWindow.DataContext = vm;
 
-            _ = vm.LoadTasksAsync();
-            _ = vm.LoadCategoriesAsync();
+            _ = vm.LoadContent();
             mainWindow.Show();
         }
     }
