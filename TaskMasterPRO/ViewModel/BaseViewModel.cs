@@ -1,15 +1,23 @@
 ﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using TaskMasterPRO.Services.Interfaces;
 
 namespace TaskMasterPRO.ViewModel
 {
-    public class BaseViewModel : INotifyPropertyChanged
+    public class BaseViewModel(
+        IDialogServices dialogServices
+        ) : ObservableObject(), INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        protected async Task ExecuteSafelyAsync(Func<Task> action, Action? onErrorRollback = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            try
+            {
+                await action();
+            }
+            catch (Exception ex)
+            { 
+                dialogServices.ShowError(ex.Message, "Error");
+                onErrorRollback?.Invoke();
+            }
         }
     }
 }

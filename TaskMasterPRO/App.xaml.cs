@@ -31,11 +31,12 @@ namespace TaskMasterPRO
             TaskRepository taskRepository = new(context);
 
             // Services
+            DialogServices dialogServices = new();
             CategoryServices categoryServices = new(categoryDomain, categoryRepository);
             TaskServices taskServices = new(taskDomain, taskRepository);
 
             // ViewModel
-            MainViewModel vm = new(categoryServices, taskServices);
+            MainViewModel vm = new(dialogServices, categoryServices, taskServices);
 
             // Main Window
             MainWindow mainWindow = new();

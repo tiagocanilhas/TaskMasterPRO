@@ -1,17 +1,15 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows;
-using TaskMasterPRO.Migrations;
 using TaskMasterPRO.Model;
-using TaskMasterPRO.Services;
 using TaskMasterPRO.Services.Interfaces;
 using Task = System.Threading.Tasks.Task;
 
 namespace TaskMasterPRO.ViewModel
 {
     public class MainViewModel(
+        IDialogServices dialogServices,
         ICategoryServices categoryServices,
         ITaskServices taskServices
-        ) : BaseViewModel
+        ) : BaseViewModel(dialogServices)
     {
         public ObservableCollection<Model.Task> Tasks { get; set; } = new();
         public ObservableCollection<Category> Categories { get; set; } = new();
@@ -35,7 +33,6 @@ namespace TaskMasterPRO.ViewModel
                 Categories.Add(category);
             }
         }
-
         /*
          * Add Task Command
          */
@@ -55,18 +52,24 @@ namespace TaskMasterPRO.ViewModel
 
         private async Task AddTask()
         {
-            var newTask = await taskServices.CreateAsync(
-                taskToAdd.Title,
-                taskToAdd.Description,
-                taskToAdd.Deadline,
-                false,
-                taskToAdd.Priority,
-                taskToAdd.CategoryId
-             );
+            await ExecuteSafelyAsync(
+                action: async () =>
+                {
+                    var newTask = await taskServices.CreateAsync(
+                        taskToAdd.Title,
+                        taskToAdd.Description,
+                        taskToAdd.Deadline,
+                        false,
+                        taskToAdd.Priority,
+                        taskToAdd.CategoryId
+                     );
 
-            TaskToAdd = new();
+                    TaskToAdd = new();
 
-            Tasks.Add(newTask);
+                    Tasks.Add(newTask);
+                },
+                onErrorRollback: () => { }
+            );
         }
 
         private bool CanAddTask()   
@@ -85,29 +88,29 @@ namespace TaskMasterPRO.ViewModel
 
         public RelayCommand ToggleTaskIsCompletedCommand => new(
             async obj => await (obj is Model.Task task ? ToggleTaskIsCompleted(task) : Task.CompletedTask), 
-            _ => CanToggleTaskIsCompleted()
+            obj => CanToggleTaskIsCompleted(obj as Model.Task)
         );
 
         private async Task ToggleTaskIsCompleted(Model.Task task)
         {
-            if (task == null) return;
-
-            Console.WriteLine(task.IsCompleted);
-
-            await taskServices.UpdateAsync(
-                task.Id, 
-                task.Title, 
-                task.Description, 
-                task.Deadline,
-                task.IsCompleted,
-                task.Priority, 
-                task.CategoryId
-            );
+            await ExecuteSafelyAsync(
+                action: async () => await taskServices.UpdateAsync(
+                    task.Id,
+                    task.Title,
+                    task.Description,
+                    task.Deadline,
+                    task.IsCompleted,
+                    task.Priority,
+                    task.CategoryId
+                    )
+                ,
+                onErrorRollback: () => task.IsCompleted = !task.IsCompleted
+                );
         }
 
-        private bool CanToggleTaskIsCompleted()
+        private bool CanToggleTaskIsCompleted(Model.Task? task)
         {
-            return true;
+            return task != null;
         }
 
 
@@ -118,31 +121,32 @@ namespace TaskMasterPRO.ViewModel
 
         public RelayCommand DeleteTaskCommand => new(
             async obj => await (obj is Model.Task task ? DeleteTask(task) : Task.CompletedTask), 
-            _ => CanDeleteTask()
+            obj => CanDeleteTask(obj as Model.Task)
             );
 
         private async Task DeleteTask(Model.Task task)
         {
-            if (task == null) return;
+            await ExecuteSafelyAsync(
+                action: async () =>
+                {
+                    bool result = dialogServices.AskConfirmation(
+                        $"Are you sure you want to delete the task '{task.Title}'?",
+                        "Confirm Deletion"
+                    );
 
-            MessageBoxResult result = 
-                MessageBox.Show(
-                    $"Are you sure you want to delete the task '{task.Title}'?",
-                    "Confirm Deletion", 
-                    MessageBoxButton.YesNo, 
-                    MessageBoxImage.Warning
-                );
+                    if (result == false) return;
 
-            if (result == MessageBoxResult.No) return;
+                    await taskServices.DeleteAsync(task.Id);
 
-            await taskServices.DeleteAsync(task.Id);
-
-            Tasks.Remove(task);
+                    Tasks.Remove(task);
+                },
+                onErrorRollback: () => { }
+            );
         }
 
-        private bool CanDeleteTask()
+        private bool CanDeleteTask(Model.Task? task)
         {
-            return true;
+            return task != null;
         }
 
 

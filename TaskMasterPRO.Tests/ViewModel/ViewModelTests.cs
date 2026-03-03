@@ -2,21 +2,28 @@
 using TaskMasterPRO.Model;
 using TaskMasterPRO.Services.Interfaces;
 using TaskMasterPRO.ViewModel;
+using Task = System.Threading.Tasks.Task;
 
 namespace TaskMasterPRO.Tests.ViewModel
 {
     public class ViewModelTests
     {
 
+        private readonly Mock<IDialogServices> _dialogServicesMock;
         private readonly Mock<ICategoryServices> _categoryServicesMock;
         private readonly Mock<ITaskServices> _taskServicesMock;
         private readonly MainViewModel _viewmodel;
 
         public ViewModelTests()
         {
+            _dialogServicesMock = new Mock<IDialogServices>();
             _categoryServicesMock = new Mock<ICategoryServices>();
             _taskServicesMock = new Mock<ITaskServices>();
-            _viewmodel = new MainViewModel(_categoryServicesMock.Object, _taskServicesMock.Object);
+            _viewmodel = new MainViewModel(
+                _dialogServicesMock.Object,
+                _categoryServicesMock.Object,
+                _taskServicesMock.Object
+            );
         }
 
         /*
@@ -160,6 +167,176 @@ namespace TaskMasterPRO.Tests.ViewModel
             _viewmodel.TaskToAdd.Deadline = DateTime.Now.AddDays(7);
             Assert.False(_viewmodel.AddTaskCommand.CanExecute(null));
         }
+
+
+
+        /*
+         * Toggle Task isCompleted Command
+         */
+
+        [Fact]
+        public void ToggleTaskIsCompletedCommand_TogglesTaskCompletion_WhenExecuted()
+        {
+            // Simulate the UI state AFTER the user clicks the checkbox.
+            // The WPF Two-Way Binding updates the property to 'true' BEFORE the command executes.
+
+            Model.Task task = new() {
+            Id = 1,
+                CreationTime = DateTime.Now,
+                Title = "Task to Toggle",
+                Description = "Task Description",
+                Deadline = DateTime.Now.AddDays(7),
+                IsCompleted = true,                         // Represents the state already modified by the UI click
+                Priority = Priority.Medium,
+                CategoryId = 1
+            };
+
+            _taskServicesMock.Setup(ser => ser.UpdateAsync(
+                task.Id,
+                task.Title,
+                task.Description,
+                task.Deadline,
+                task.IsCompleted,
+                task.Priority,
+                task.CategoryId
+                )).ReturnsAsync(task);
+
+            _viewmodel.ToggleTaskIsCompletedCommand.Execute(task);
+
+            _taskServicesMock.Verify(ser => ser.UpdateAsync(
+                task.Id,
+                task.Title,
+                task.Description,
+                task.Deadline,
+                task.IsCompleted,
+                task.Priority,
+                task.CategoryId
+                ), Times.Once);
+
+            Assert.True(task.IsCompleted);
+        }
+
+        [Fact]
+        public void ToggleTaskIsCompletedCommand_CanExecute_ReturnsFalse_WhenTaskIsNull()
+        {
+            Assert.False(_viewmodel.ToggleTaskIsCompletedCommand.CanExecute(null));
+
+            _taskServicesMock.Verify(ser => ser.UpdateAsync(
+               It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(),
+               It.IsAny<DateTime>(), It.IsAny<bool>(), It.IsAny<Priority>(), It.IsAny<int>()
+           ), Times.Never);
+        }
+
+        [Fact]
+        public async Task ToggleTaskIsCompletedCommand_OnDatabaseFailure_RollsBackState()
+        {
+            var task = new Model.Task { Id = 1, IsCompleted = true };
+
+            _taskServicesMock.Setup(ser => ser.UpdateAsync(
+                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<DateTime>(), It.IsAny<bool>(), It.IsAny<Priority>(), It.IsAny<int>()
+            )).ThrowsAsync(new Exception("Database connection failed"));
+
+            _viewmodel.ToggleTaskIsCompletedCommand.Execute(task);
+
+            Assert.False(task.IsCompleted);
+        }
+
+
+
+        /*
+         * Remove Task Command
+         */
+
+        [Fact]
+        public void DeleteTaskCommand_RemovesTask_WhenExecutedAndUserConfirms()
+        {
+            Model.Task task = new()
+            {
+                Id = 1,
+                CreationTime = DateTime.Now,
+                Title = "Task to Delete",
+                Description = "Task Description",
+                Deadline = DateTime.Now.AddDays(7),
+                IsCompleted = false,
+                Priority = Priority.Medium,
+                CategoryId = 1
+            };
+            _viewmodel.Tasks.Add(task);
+
+            int oldCount = _viewmodel.Tasks.Count;
+
+            _dialogServicesMock.Setup(d => d.AskConfirmation(It.IsAny<string>(), It.IsAny<string>())).Returns(true); // Simulate user confirming the deletion
+            _taskServicesMock.Setup(ser => ser.DeleteAsync(task.Id)).Returns(Task.CompletedTask);
+            _viewmodel.DeleteTaskCommand.Execute(task);
+
+            int newCount = _viewmodel.Tasks.Count;
+
+            Assert.True(oldCount > newCount);
+        }
+
+        [Fact]
+        public void DeleteTaskCommand_RemovesTask_WhenExecutedButUserCancels()
+        {
+            Model.Task task = new()
+            {
+                Id = 1,
+                CreationTime = DateTime.Now,
+                Title = "Task to Delete",
+                Description = "Task Description",
+                Deadline = DateTime.Now.AddDays(7),
+                IsCompleted = false,
+                Priority = Priority.Medium,
+                CategoryId = 1
+            };
+            _viewmodel.Tasks.Add(task);
+
+            int oldCount = _viewmodel.Tasks.Count;
+
+            _dialogServicesMock.Setup(d => d.AskConfirmation(It.IsAny<string>(), It.IsAny<string>())).Returns(false); // Simulate user cancelling the deletion
+            _taskServicesMock.Setup(ser => ser.DeleteAsync(task.Id)).Returns(Task.CompletedTask);
+            _viewmodel.DeleteTaskCommand.Execute(task);
+
+            int newCount = _viewmodel.Tasks.Count;
+
+            Assert.True(oldCount == newCount);
+        }
+
+        [Fact]
+        public void DeleteTaskCommand_CanExecute_ReturnsFalse_WhenTaskIsNull()
+        {
+            Assert.False(_viewmodel.DeleteTaskCommand.CanExecute(null));
+            _taskServicesMock.Verify(ser => ser.DeleteAsync(It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public void DeleteTaskCommand_OnDatabaseFailure_DoesNotRemoveTask()
+        {
+            Model.Task task = new()
+            {
+                Id = 1,
+                CreationTime = DateTime.Now,
+                Title = "Task to Delete",
+                Description = "Task Description",
+                Deadline = DateTime.Now.AddDays(7),
+                IsCompleted = false,
+                Priority = Priority.Medium,
+                CategoryId = 1
+            };
+            _viewmodel.Tasks.Add(task);
+
+            int oldCount = _viewmodel.Tasks.Count;
+
+            _dialogServicesMock.Setup(d => d.AskConfirmation(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
+            _taskServicesMock.Setup(ser => ser.DeleteAsync(task.Id)).ThrowsAsync(new Exception("Error deleting task from database"));
+            _viewmodel.DeleteTaskCommand.Execute(task);
+
+            int newCount = _viewmodel.Tasks.Count;
+
+            Assert.True(oldCount == newCount);
+        }
+
+
 
 
 

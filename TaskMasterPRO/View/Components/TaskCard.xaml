@@ -37,6 +37,14 @@
                     CommandParameter="{Binding}"
                     >
                     
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="Transparent">
+                                <ContentPresenter VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                    
                     <Path 
                         Fill="#FF5252"
                         Stretch="Uniform"
