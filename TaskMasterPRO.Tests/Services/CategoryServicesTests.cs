@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
-using TaskMasterPRO.Model;
-using TaskMasterPRO.Repository.Interfaces;
-using TaskMasterPRO.Services;
+using TaskMasterPRO.Data.Domain;
+using TaskMasterPRO.Data.Repository.Interfaces;
+using TaskMasterPRO.Data.Services;
 using Task = System.Threading.Tasks.Task;
 
 namespace TaskMasterPRO.Tests.Services

@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using TaskMasterPRO.Data;
-using TaskMasterPRO.Model;
-using TaskMasterPRO.Repository;
-using Task = TaskMasterPRO.Model.Task;
+using TaskMasterPRO.Data.Domain;
+using TaskMasterPRO.Data.Database;
+using TaskMasterPRO.Data.Repository;
+using Task = TaskMasterPRO.Data.Domain.Task;
 
 namespace TaskMasterPRO.Tests.Repository
 {

@@ -1,7 +1,7 @@
 ﻿using Moq;
-using TaskMasterPRO.Model;
-using TaskMasterPRO.Repository.Interfaces;
-using TaskMasterPRO.Services;
+using TaskMasterPRO.Data.Domain;
+using TaskMasterPRO.Data.Repository.Interfaces;
+using TaskMasterPRO.Data.Services;
 using Task = System.Threading.Tasks.Task;
 
 namespace TaskMasterPRO.Tests.Services
@@ -42,7 +42,7 @@ namespace TaskMasterPRO.Tests.Services
             Priority priority = Priority.Medium;
             int categoryId = 1;
 
-            Model.Task task = new()
+            Data.Domain.Task task = new()
             {
                 Id = 1,
                 CreationTime = DateTime.Now,
@@ -55,7 +55,7 @@ namespace TaskMasterPRO.Tests.Services
                 Category = category
             };
 
-            _repoMock.Setup(repo => repo.CreateAsync(It.IsAny<Model.Task>())).ReturnsAsync(task);
+            _repoMock.Setup(repo => repo.CreateAsync(It.IsAny<Data.Domain.Task>())).ReturnsAsync(task);
 
             var res = await _service.CreateAsync(title, description, deadline, isCompleted, priority, categoryId);
         }
@@ -105,9 +105,9 @@ namespace TaskMasterPRO.Tests.Services
                 Color = "#FF5733"
             };
 
-            List<Model.Task> tasks =
+            List<Data.Domain.Task> tasks =
             [
-                new Model.Task
+                new Data.Domain.Task
                 {
                     Id = 1,
                     CreationTime = DateTime.Now,
@@ -119,7 +119,7 @@ namespace TaskMasterPRO.Tests.Services
                     CategoryId = 1,
                     Category = category
                 },
-                new Model.Task
+                new Data.Domain.Task
                 {
                     Id = 2,
                     CreationTime = DateTime.Now,
@@ -153,7 +153,7 @@ namespace TaskMasterPRO.Tests.Services
                 Color = "#FF5733"
             };
 
-            Model.Task task = new()
+            Data.Domain.Task task = new()
             {
                 Id = id,
                 CreationTime = DateTime.Now,
@@ -179,7 +179,7 @@ namespace TaskMasterPRO.Tests.Services
         public async void GetByIdAsync_Failure_NotFound()
         {
             int id = 1;
-            _repoMock.Setup(repo => repo.GetAsync(id)).ReturnsAsync((Model.Task)null!);
+            _repoMock.Setup(repo => repo.GetAsync(id)).ReturnsAsync((Data.Domain.Task)null!);
             await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
                 await _service.GetByIdAsync(id)
             );
@@ -211,7 +211,7 @@ namespace TaskMasterPRO.Tests.Services
 
 
             int id = 1;
-            Model.Task task = new()
+            Data.Domain.Task task = new()
             {
                 Id = id,
                 CreationTime = DateTime.Now,
@@ -233,7 +233,7 @@ namespace TaskMasterPRO.Tests.Services
 
 
             _repoMock.Setup(repo => repo.GetAsync(id)).ReturnsAsync(task);
-            _repoMock.Setup(repo => repo.UpdateAsync(It.IsAny<Model.Task>())).ReturnsAsync(task);
+            _repoMock.Setup(repo => repo.UpdateAsync(It.IsAny<Data.Domain.Task>())).ReturnsAsync(task);
             var res = await _service.UpdateAsync(id, title, description, deadline, isCompleted, priority, categoryId);
 
             Assert.NotNull(res);
@@ -257,7 +257,7 @@ namespace TaskMasterPRO.Tests.Services
             Priority priority = Priority.High;
             int categoryId = 2;
 
-            _repoMock.Setup(repo => repo.UpdateAsync(It.IsAny<Model.Task>())).ReturnsAsync((Model.Task)null!);
+            _repoMock.Setup(repo => repo.UpdateAsync(It.IsAny<Data.Domain.Task>())).ReturnsAsync((Data.Domain.Task)null!);
 
             await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
                 await _service.UpdateAsync(id, title, description, deadline, isCompleted, priority, categoryId)
@@ -306,7 +306,7 @@ namespace TaskMasterPRO.Tests.Services
         public async void DeleteAsync_Success()
         {
             int id = 1;
-            Model.Task task = new()
+            Data.Domain.Task task = new()
             {
                 Id = id,
                 CreationTime = DateTime.Now,
@@ -330,7 +330,7 @@ namespace TaskMasterPRO.Tests.Services
         public async void DeleteAsync_Failure_NotFound()
         {
             int id = 1;
-            _repoMock.Setup(repo => repo.GetAsync(id)).ReturnsAsync((Model.Task)null!);
+            _repoMock.Setup(repo => repo.GetAsync(id)).ReturnsAsync((Data.Domain.Task)null!);
 
             await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
                 await _service.DeleteAsync(id)

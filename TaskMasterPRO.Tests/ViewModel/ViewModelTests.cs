@@ -1,6 +1,6 @@
 ﻿using Moq;
-using TaskMasterPRO.Model;
-using TaskMasterPRO.Services.Interfaces;
+using TaskMasterPRO.Data.Domain;
+using TaskMasterPRO.Data.Services.Interfaces;
 using TaskMasterPRO.ViewModel;
 using Task = System.Threading.Tasks.Task;
 
@@ -33,9 +33,9 @@ namespace TaskMasterPRO.Tests.ViewModel
         [Fact]
         public async void LoadTasks_LoadsTasks_WhenExecuted()
         {
-            List<Model.Task> tasks = new()
+            List<Data.Domain.Task> tasks = new()
             {
-                new Model.Task
+                new Data.Domain.Task
                 {
                     Id = 1,
                     CreationTime = DateTime.Now,
@@ -46,7 +46,7 @@ namespace TaskMasterPRO.Tests.ViewModel
                     Priority = Priority.Medium,
                     CategoryId = 1
                 },
-                new Model.Task
+                new Data.Domain.Task
                 {
                     Id = 2,
                     CreationTime = DateTime.Now,
@@ -74,7 +74,7 @@ namespace TaskMasterPRO.Tests.ViewModel
         [Fact]
         public void AddTaskCommand_AddsTask_WhenExecuted()
         {
-            Model.Task task = new()
+            Data.Domain.Task task = new()
             {
                 Id = 1,
                 CreationTime = DateTime.Now,
@@ -107,7 +107,7 @@ namespace TaskMasterPRO.Tests.ViewModel
         [Fact]
         public void AddTaskCommand_TaskToAddIsReset_WhenExecuted()
         {
-            Model.Task task = new()
+            Data.Domain.Task task = new()
             {
                 Id = 1,
                 CreationTime = DateTime.Now,
@@ -180,7 +180,7 @@ namespace TaskMasterPRO.Tests.ViewModel
             // Simulate the UI state AFTER the user clicks the checkbox.
             // The WPF Two-Way Binding updates the property to 'true' BEFORE the command executes.
 
-            Model.Task task = new() {
+            Data.Domain.Task task = new() {
             Id = 1,
                 CreationTime = DateTime.Now,
                 Title = "Task to Toggle",
@@ -230,7 +230,7 @@ namespace TaskMasterPRO.Tests.ViewModel
         [Fact]
         public async Task ToggleTaskIsCompletedCommand_OnDatabaseFailure_RollsBackState()
         {
-            var task = new Model.Task { Id = 1, IsCompleted = true };
+            var task = new Data.Domain.Task { Id = 1, IsCompleted = true };
 
             _taskServicesMock.Setup(ser => ser.UpdateAsync(
                 It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(),
@@ -251,7 +251,7 @@ namespace TaskMasterPRO.Tests.ViewModel
         [Fact]
         public void DeleteTaskCommand_RemovesTask_WhenExecutedAndUserConfirms()
         {
-            Model.Task task = new()
+            Data.Domain.Task task = new()
             {
                 Id = 1,
                 CreationTime = DateTime.Now,
@@ -278,7 +278,7 @@ namespace TaskMasterPRO.Tests.ViewModel
         [Fact]
         public void DeleteTaskCommand_RemovesTask_WhenExecutedButUserCancels()
         {
-            Model.Task task = new()
+            Data.Domain.Task task = new()
             {
                 Id = 1,
                 CreationTime = DateTime.Now,
@@ -312,7 +312,7 @@ namespace TaskMasterPRO.Tests.ViewModel
         [Fact]
         public void DeleteTaskCommand_OnDatabaseFailure_DoesNotRemoveTask()
         {
-            Model.Task task = new()
+            Data.Domain.Task task = new()
             {
                 Id = 1,
                 CreationTime = DateTime.Now,

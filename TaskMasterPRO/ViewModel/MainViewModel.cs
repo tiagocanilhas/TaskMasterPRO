@@ -1,8 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Data;
-using TaskMasterPRO.Model;
-using TaskMasterPRO.Services.Interfaces;
+using TaskMasterPRO.Core;
+using TaskMasterPRO.Data.Domain;
+using TaskMasterPRO.Data.Services.Interfaces;
+using TaskMasterPRO.ViewData.Domain.Components.Filter;
 using Task = System.Threading.Tasks.Task;
 
 namespace TaskMasterPRO.ViewModel
@@ -13,7 +15,7 @@ namespace TaskMasterPRO.ViewModel
         ITaskServices taskServices
         ) : BaseViewModel(dialogServices)
     {
-        public ObservableCollection<Model.Task> Tasks { get; set; } = new();
+        public ObservableCollection<Data.Domain.Task> Tasks { get; set; } = new();
         public ICollectionView TasksView { get; private set; }
 
         public ObservableCollection<Category> Categories { get; set; } = new();
@@ -36,7 +38,7 @@ namespace TaskMasterPRO.ViewModel
             FilterPanel.FiltersChanged += () => TasksView.Refresh();
         }
 
-        private async Task LoadTasksAsync()
+        public async Task LoadTasksAsync()
         {
             var data = await taskServices.GetAllAsync();
             Tasks.Clear();
@@ -48,7 +50,7 @@ namespace TaskMasterPRO.ViewModel
 
         private bool FilterTaskPredicate(object obj)
         {
-            if (obj is not Model.Task task)
+            if (obj is not Data.Domain.Task task)
                 return false;
 
             var selectedCategories = FilterPanel.CategoryFilters.Where(f => f.IsSelected).ToList();
@@ -66,13 +68,13 @@ namespace TaskMasterPRO.ViewModel
             return categoryMatch && priorityMatch;
         }
 
-        private async Task LoadCategoriesAsync()
+        public async Task LoadCategoriesAsync()
         {
             var data = await categoryServices.GetAllAsync();
             Categories.Clear();
 
             FilterPanel.CategoryFilters.Clear();
-            FilterPanel.CategoryFilters.Add(new FilterItem<Category>
+            FilterPanel.CategoryFilters.Add(new FilterItem<Category>()
             {
                 DisplayName = "All",
                 IsSelected = true
@@ -118,8 +120,8 @@ namespace TaskMasterPRO.ViewModel
          * Add Task Command
          */
 
-        private Model.Task taskToAdd = new();
-        public Model.Task TaskToAdd
+        private Data.Domain.Task taskToAdd = new();
+        public Data.Domain.Task TaskToAdd
         {
             get => taskToAdd;
             set
@@ -168,11 +170,11 @@ namespace TaskMasterPRO.ViewModel
          */
 
         public RelayCommand ToggleTaskIsCompletedCommand => new(
-            async obj => await (obj is Model.Task task ? ToggleTaskIsCompleted(task) : Task.CompletedTask),
-            obj => CanToggleTaskIsCompleted(obj as Model.Task)
+            async obj => await (obj is Data.Domain.Task task ? ToggleTaskIsCompleted(task) : Task.CompletedTask),
+            obj => CanToggleTaskIsCompleted((obj as Data.Domain.Task))
         );
 
-        private async Task ToggleTaskIsCompleted(Model.Task task)
+        private async Task ToggleTaskIsCompleted(Data.Domain.Task task)
         {
             await ExecuteSafelyAsync(
                 action: async () => await taskServices.UpdateAsync(
@@ -189,7 +191,7 @@ namespace TaskMasterPRO.ViewModel
                 );
         }
 
-        private bool CanToggleTaskIsCompleted(Model.Task? task)
+        private bool CanToggleTaskIsCompleted(Data.Domain.Task? task)
         {
             return task != null;
         }
@@ -201,11 +203,11 @@ namespace TaskMasterPRO.ViewModel
          */
 
         public RelayCommand DeleteTaskCommand => new(
-            async obj => await (obj is Model.Task task ? DeleteTask(task) : Task.CompletedTask),
-            obj => CanDeleteTask(obj as Model.Task)
+            async obj => await (obj is Data.Domain.Task task ? DeleteTask(task) : Task.CompletedTask),
+            obj => CanDeleteTask((obj as Data.Domain.Task))
             );
 
-        private async Task DeleteTask(Model.Task task)
+        private async Task DeleteTask(Data.Domain.Task task)
         {
             await ExecuteSafelyAsync(
                 action: async () =>
@@ -225,7 +227,7 @@ namespace TaskMasterPRO.ViewModel
             );
         }
 
-        private bool CanDeleteTask(Model.Task? task)
+        private bool CanDeleteTask(Data.Domain.Task? task)
         {
             return task != null;
         }

@@ -1,11 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Configuration;
-using System.Data;
 using System.Windows;
-using TaskMasterPRO.Data;
-using TaskMasterPRO.Model;
-using TaskMasterPRO.Repository;
-using TaskMasterPRO.Services;
+using TaskMasterPRO.Data.Database;
+using TaskMasterPRO.Data.Domain;
+using TaskMasterPRO.Data.Repository;
+using TaskMasterPRO.Data.Services;
 using TaskMasterPRO.ViewModel;
 
 namespace TaskMasterPRO
