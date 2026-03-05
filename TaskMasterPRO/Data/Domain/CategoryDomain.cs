@@ -14,9 +14,14 @@ namespace TaskMasterPRO.Data.Domain
             return !string.IsNullOrWhiteSpace(name);
         }
 
+        public bool IsDescriptionValid(string desc)
+        {
+            return !string.IsNullOrWhiteSpace(desc);
+        }
+
         public bool IsColorValid(string color)
         {
-            return Regex.IsMatch(color, "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$"); // Example: #FFFFFF or #FFF
+            return Regex.IsMatch(color, "^#([0-9A-Fa-f]{8}|[0-9A-Fa-f]{6})$");
         }
     }
 }

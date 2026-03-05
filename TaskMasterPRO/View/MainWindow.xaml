@@ -10,6 +10,7 @@
         xmlns:components="clr-namespace:TaskMasterPRO.View.Components"
         d:DataContext="{d:DesignInstance Type=viewmodel:MainViewModel}"
         mc:Ignorable="d"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -19,7 +20,7 @@
 
         <StackPanel Grid.Column="0" Margin="10">
             <TextBlock Text="Search by Title:"/>
-            <TextBox x:Name="SearchBox"/>
+            <TextBox Text="{Binding FilterPanel.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Separator Margin="0 10" />
 
@@ -34,7 +35,6 @@
                 Header="Priorities"
                 ItemsSource="{Binding FilterPanel.PriorityFilters}"
                 />
-
         </StackPanel>
 
         <Grid Grid.Column="1">
@@ -156,6 +156,12 @@
                         <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding CategoryToAdd.Description, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="Color" VerticalAlignment="Center"/>
+                        <xctk:ColorPicker 
+                            Grid.Row="2" Grid.Column="2"
+                            SelectedColor="{Binding CategoryToAdd.Color}" 
+                            DisplayColorAndName="True" 
+                            AvailableColorsHeader="Cores Disponíveis" 
+                            />
                     </Grid>
 
                     <Button Content="Add Category" Command="{Binding AddCategoryCommand}" Margin="0,10,0,0"/>

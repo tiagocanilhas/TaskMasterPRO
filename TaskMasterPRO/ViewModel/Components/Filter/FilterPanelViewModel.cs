@@ -3,11 +3,22 @@ using System.Windows.Input;
 using TaskMasterPRO.Core;
 using TaskMasterPRO.Data.Domain;
 
-namespace TaskMasterPRO.ViewData.Domain.Components.Filter
+namespace TaskMasterPRO.ViewModel.Components.Filter
 {
     public partial class FilterPanelViewModel : ObservableObject
     {
         public event Action? FiltersChanged;
+
+        private string searchText = string.Empty;
+        public string SearchText
+        {
+            get => searchText;
+            set
+            {
+                if (SetProperty(ref searchText, value))
+                    FiltersChanged?.Invoke();
+            }
+        }
 
         public ObservableCollection<FilterItem<Category>> CategoryFilters { get; set; } = new();
         public ObservableCollection<FilterItem<Priority>> PriorityFilters { get; set; } = new();

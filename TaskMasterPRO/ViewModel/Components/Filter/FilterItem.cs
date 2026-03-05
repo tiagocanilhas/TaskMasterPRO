@@ -1,6 +1,6 @@
 ﻿using TaskMasterPRO.Core;
 
-namespace TaskMasterPRO.ViewData.Domain.Components.Filter
+namespace TaskMasterPRO.ViewModel.Components.Filter
 {
     public class FilterItem<T> : ObservableObject
     {

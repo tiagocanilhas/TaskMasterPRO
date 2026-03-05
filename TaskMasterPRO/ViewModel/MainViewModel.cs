@@ -4,7 +4,7 @@ using System.Windows.Data;
 using TaskMasterPRO.Core;
 using TaskMasterPRO.Data.Domain;
 using TaskMasterPRO.Data.Services.Interfaces;
-using TaskMasterPRO.ViewData.Domain.Components.Filter;
+using TaskMasterPRO.ViewModel.Components.Filter;
 using Task = System.Threading.Tasks.Task;
 
 namespace TaskMasterPRO.ViewModel
@@ -16,11 +16,35 @@ namespace TaskMasterPRO.ViewModel
         ) : BaseViewModel(dialogServices)
     {
         public ObservableCollection<Data.Domain.Task> Tasks { get; set; } = new();
-        public ICollectionView TasksView { get; private set; }
+        public ICollectionView? TasksView { get; private set; }
 
         public ObservableCollection<Category> Categories { get; set; } = new();
 
         public FilterPanelViewModel FilterPanel { get; } = new();
+
+        private bool FilterTaskPredicate(object obj)
+        {
+            if (obj is not Data.Domain.Task task)
+                return false;
+
+            var selectedCategories = FilterPanel.CategoryFilters.Where(f => f.IsSelected).ToList();
+
+            bool categoryMatch =
+                selectedCategories.Any(f => f.DisplayName == "All") ||
+                selectedCategories.Any(f => f.Item?.Id == task.CategoryId);
+
+            var selectedPriorities = FilterPanel.PriorityFilters.Where(f => f.IsSelected).ToList();
+
+            bool priorityMatch =
+                selectedPriorities.Any(f => f.DisplayName == "All") ||
+                selectedPriorities.Any(f => f.Item == task.Priority);
+
+            bool searchMatch =
+                string.IsNullOrWhiteSpace(FilterPanel.SearchText) ||
+                task.Title.Contains(FilterPanel.SearchText, StringComparison.OrdinalIgnoreCase);
+
+            return categoryMatch && priorityMatch && searchMatch;
+        }
 
         /*
          * Load Content
@@ -46,26 +70,6 @@ namespace TaskMasterPRO.ViewModel
             {
                 Tasks.Add(task);
             }
-        }
-
-        private bool FilterTaskPredicate(object obj)
-        {
-            if (obj is not Data.Domain.Task task)
-                return false;
-
-            var selectedCategories = FilterPanel.CategoryFilters.Where(f => f.IsSelected).ToList();
-
-            bool categoryMatch = 
-                selectedCategories.Any(f => f.DisplayName == "All") ||
-                selectedCategories.Any(f => f.Item?.Id == task.CategoryId);
-
-            var selectedPriorities = FilterPanel.PriorityFilters.Where(f => f.IsSelected).ToList();
-
-            bool priorityMatch = 
-                selectedPriorities.Any(f => f.DisplayName == "All") ||
-                selectedPriorities.Any(f => f.Item == task.Priority);
-
-            return categoryMatch && priorityMatch;
         }
 
         public async Task LoadCategoriesAsync()
@@ -263,13 +267,20 @@ namespace TaskMasterPRO.ViewModel
             CategoryToAdd = new();
 
             Categories.Add(newCategory);
+            FilterPanel.CategoryFilters.Add(new FilterItem<Category>
+            {
+                DisplayName = newCategory.Name,
+                Item = newCategory,
+                IsSelected = false
+            });
         }
 
         private bool CanAddCategory()
         {
             bool hasValidName = !string.IsNullOrWhiteSpace(CategoryToAdd.Name);
+            bool hasValidDescription = !string.IsNullOrWhiteSpace(CategoryToAdd.Description);
             bool hasValidColor = !string.IsNullOrWhiteSpace(CategoryToAdd.Color);
-            return hasValidName && hasValidColor;
+            return hasValidName && hasValidDescription && hasValidColor;
         }
     }
 }

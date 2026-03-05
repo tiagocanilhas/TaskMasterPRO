@@ -17,6 +17,7 @@ namespace TaskMasterPRO.Data.Services
             )
         {
             if (!categoryDomain.IsNameValid(name)) throw new ArgumentException("Invalid category name.");
+            if (!categoryDomain.IsDescriptionValid(description)) throw new ArgumentException("Invalid category description.");
             if (!categoryDomain.IsColorValid(color)) throw new ArgumentException("Invalid category color.");
 
             Category category = new()
