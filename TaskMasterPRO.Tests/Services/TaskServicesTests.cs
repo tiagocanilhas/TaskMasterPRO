@@ -299,6 +299,46 @@ namespace TaskMasterPRO.Tests.Services
 
 
         /*
+         * Update isCompleted
+         */
+
+        [Fact]
+        public async void UpdateIsCompletedAsync_Success()
+        {
+            int id = 1;
+            Data.Domain.Task task = new()
+            {
+                Id = id,
+                CreationTime = DateTime.Now,
+                Title = "Test Task",
+                Description = "This is a test task.",
+                Deadline = DateTime.Now.AddDays(1),
+                IsCompleted = false,
+                Priority = Priority.Medium,
+                CategoryId = 1
+            };
+
+            _repoMock.Setup(repo => repo.GetAsync(id)).ReturnsAsync(task);
+            _repoMock.Setup(repo => repo.UpdateAsync(It.IsAny<Data.Domain.Task>())).ReturnsAsync(task);
+
+            await _service.UpdateIsCompleteAsync(id, true); // Does not return anything, just checks if it runs without exceptions
+            Assert.Equal(task.Id, id);
+            Assert.True(task.IsCompleted);
+        }
+
+        [Fact]
+        public async void UpdateIsCompletedAsync_Failure_NotFound()
+        {
+            int id = 1;
+            _repoMock.Setup(repo => repo.GetAsync(id)).ReturnsAsync((Data.Domain.Task)null!);
+            await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+                await _service.UpdateIsCompleteAsync(id, true)
+            );
+        }
+
+
+
+        /*
          * Delete
          */
 

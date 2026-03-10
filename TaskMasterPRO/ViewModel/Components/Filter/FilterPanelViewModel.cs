@@ -20,6 +20,17 @@ namespace TaskMasterPRO.ViewModel.Components.Filter
             }
         }
 
+        private bool showOnlyActive = true;
+        public bool ShowOnlyActive
+        {
+            get => showOnlyActive;
+            set
+            {
+                if (SetProperty(ref showOnlyActive, value))
+                    FiltersChanged?.Invoke();
+            }
+        }
+
         public ObservableCollection<FilterItem<Category>> CategoryFilters { get; set; } = new();
         public ObservableCollection<FilterItem<Priority>> PriorityFilters { get; set; } = new();
 

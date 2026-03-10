@@ -43,7 +43,10 @@ namespace TaskMasterPRO.ViewModel
                 string.IsNullOrWhiteSpace(FilterPanel.SearchText) ||
                 task.Title.Contains(FilterPanel.SearchText, StringComparison.OrdinalIgnoreCase);
 
-            return categoryMatch && priorityMatch && searchMatch;
+            bool isCompletedMatch =
+                !FilterPanel.ShowOnlyActive || !task.IsCompleted;
+
+            return categoryMatch && priorityMatch && searchMatch && isCompletedMatch;
         }
 
         /*
@@ -58,6 +61,7 @@ namespace TaskMasterPRO.ViewModel
 
             TasksView = CollectionViewSource.GetDefaultView(Tasks);
             TasksView.Filter = FilterTaskPredicate;
+
             FilterPanel.FiltersChanged -= () => TasksView.Refresh();
             FilterPanel.FiltersChanged += () => TasksView.Refresh();
         }
@@ -181,14 +185,9 @@ namespace TaskMasterPRO.ViewModel
         private async Task ToggleTaskIsCompleted(Data.Domain.Task task)
         {
             await ExecuteSafelyAsync(
-                action: async () => await taskServices.UpdateAsync(
+                action: async () => await taskServices.UpdateIsCompleteAsync(
                     task.Id,
-                    task.Title,
-                    task.Description,
-                    task.Deadline,
-                    task.IsCompleted,
-                    task.Priority,
-                    task.CategoryId
+                    task.IsCompleted
                     )
                 ,
                 onErrorRollback: () => task.IsCompleted = !task.IsCompleted

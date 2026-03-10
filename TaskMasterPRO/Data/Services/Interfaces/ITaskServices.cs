@@ -28,6 +28,11 @@ namespace TaskMasterPRO.Data.Services.Interfaces
             int categoryId
             );
 
+        Task UpdateIsCompleteAsync(
+            int id,
+            bool isComplete
+            );
+
         Task DeleteAsync(int id);
     }
 }

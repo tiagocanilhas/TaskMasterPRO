@@ -12,6 +12,11 @@ namespace TaskMasterPRO.Data.Repository.Interfaces
 
         Task<Domain.Task> UpdateAsync(Domain.Task task);
 
+        Task UpdateIsCompleteAsync(
+            int id,
+            bool isComplete
+            );
+
         Task DeleteAsync(Domain.Task task);
     }
 }

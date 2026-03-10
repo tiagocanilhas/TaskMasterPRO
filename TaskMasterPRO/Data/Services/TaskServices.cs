@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TaskMasterPRO.Data.Domain;
+﻿using TaskMasterPRO.Data.Domain;
 using TaskMasterPRO.Data.Repository.Interfaces;
 using TaskMasterPRO.Data.Services.Interfaces;
 using Task = System.Threading.Tasks.Task;
@@ -73,6 +68,18 @@ namespace TaskMasterPRO.Data.Services
             task.CategoryId = categoryId;
 
             return await repository.UpdateAsync(task);
+        }
+
+        public async Task UpdateIsCompleteAsync(
+            int id,
+            bool isComplete
+            )
+        {
+            Domain.Task task = await repository.GetAsync(id) ?? throw new KeyNotFoundException($"Task with id {id} not found.");
+
+            task.IsCompleted = isComplete;
+
+            await repository.UpdateIsCompleteAsync(id, isComplete);
         }
 
         public async Task DeleteAsync(int id)

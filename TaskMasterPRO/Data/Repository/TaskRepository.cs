@@ -26,6 +26,7 @@ namespace TaskMasterPRO.Data.Repository
         public async Task<Domain.Task?> GetAsync(int id)
         {
             return await context.Task
+                .AsNoTracking()
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
@@ -35,6 +36,16 @@ namespace TaskMasterPRO.Data.Repository
             await context.SaveChangesAsync();
 
             return task;
+        }
+
+        public async Task UpdateIsCompleteAsync(
+            int id,
+            bool isComplete
+            )
+        {
+            await context.Task
+                .Where(t => t.Id == id)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(t => t.IsCompleted, isComplete));
         }
 
         public async Task DeleteAsync(Domain.Task task)

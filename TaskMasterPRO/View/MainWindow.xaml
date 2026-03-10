@@ -22,6 +22,11 @@
             <TextBlock Text="Search by Title:"/>
             <TextBox Text="{Binding FilterPanel.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
 
+            <CheckBox 
+                Content="Only Active"
+                IsChecked="{Binding FilterPanel.ShowOnlyActive, UpdateSourceTrigger=PropertyChanged}"
+                />
+
             <Separator Margin="0 10" />
 
             <components:FilterGroup 

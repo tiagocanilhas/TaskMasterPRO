@@ -27,6 +27,103 @@ namespace TaskMasterPRO.Tests.ViewModel
         }
 
         /*
+         * Search Text
+         */
+
+        [Fact]
+        public async void SearchText_UpdatesSearchTextAndFilterTasks_WhenChanged()
+        {
+            List<Data.Domain.Task> tasks = new()
+            {
+                new Data.Domain.Task {Title = "Task 1", },
+                new Data.Domain.Task {Title = "Task 2", },
+            };
+
+            _categoryServicesMock.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<Category>());
+            _taskServicesMock.Setup(ser => ser.GetAllAsync()).ReturnsAsync(tasks);
+            await _viewmodel.LoadContent(); 
+            
+            _viewmodel.FilterPanel.SearchText = "1";
+
+            var filteredList = _viewmodel.TasksView.Cast<Data.Domain.Task>().ToList();
+
+            Assert.Single(filteredList);
+            Assert.Equal("Task 1", filteredList[0].Title);
+        }
+
+        [Fact]
+        public async void SearchText_UpdatesSearchTextAndFilterTasks_NoMatch()
+        {
+            List<Data.Domain.Task> tasks = new()
+            {
+                new Data.Domain.Task {Title = "Task 1", },
+                new Data.Domain.Task {Title = "Task 2", },
+            };
+
+            _categoryServicesMock.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<Category>());
+            _taskServicesMock.Setup(ser => ser.GetAllAsync()).ReturnsAsync(tasks);
+            await _viewmodel.LoadContent(); 
+            
+            _viewmodel.FilterPanel.SearchText = "nothing";
+
+            var filteredList = _viewmodel.TasksView.Cast<Data.Domain.Task>().ToList();
+
+            Assert.Empty(filteredList);
+        }
+
+        /*
+         * Show Only Active
+         */
+
+        [Fact]
+        public async void TasksView_ShouldHideCompletedTasks_WhenShowOnlyActiveIsTrue()
+        {
+            List<Data.Domain.Task> tasks = new()
+            {
+                new Data.Domain.Task {Title = "Task 1", IsCompleted = true },
+                new Data.Domain.Task {Title = "Task 2", IsCompleted = false }
+            };
+
+            _categoryServicesMock.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<Category>());
+            _taskServicesMock.Setup(ser => ser.GetAllAsync()).ReturnsAsync(tasks);
+            await _viewmodel.LoadContent();
+
+            var filteredList = _viewmodel.TasksView.Cast<Data.Domain.Task>().ToList();
+
+            Assert.Single(filteredList);
+            Assert.False(filteredList[0].IsCompleted);
+            Assert.Equal("Task 2", filteredList[0].Title);
+        }
+
+        [Fact]
+        public async void TasksView_SelectedAnIsComplete_ShouldShowOnlyActiveTasks_WhenShowOnlyActiveIsTrue()
+        {
+            List<Data.Domain.Task> tasks = new()
+            {
+                new Data.Domain.Task {Title = "Task 1", IsCompleted = true },
+                new Data.Domain.Task {Title = "Task 2", IsCompleted = false },
+                new Data.Domain.Task {Title = "Task 3", IsCompleted = false }
+            };
+
+            Data.Domain.Task task = tasks[1]; 
+
+            _categoryServicesMock.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<Category>());
+            _taskServicesMock.Setup(ser => ser.GetAllAsync()).ReturnsAsync(tasks);
+            await _viewmodel.LoadContent();
+
+            Assert.Contains(task, _viewmodel.TasksView.Cast<Data.Domain.Task>());
+
+            task.IsCompleted = true;
+            _viewmodel.TasksView.Refresh();
+
+            var visibleTasks = _viewmodel.TasksView.Cast<Data.Domain.Task>().ToList();
+
+            Assert.Single(visibleTasks);
+        }
+
+
+
+        /*
          * Tasks loaded
          */
 
@@ -191,27 +288,11 @@ namespace TaskMasterPRO.Tests.ViewModel
                 CategoryId = 1
             };
 
-            _taskServicesMock.Setup(ser => ser.UpdateAsync(
-                task.Id,
-                task.Title,
-                task.Description,
-                task.Deadline,
-                task.IsCompleted,
-                task.Priority,
-                task.CategoryId
-                )).ReturnsAsync(task);
+            _taskServicesMock.Setup(ser => ser.UpdateIsCompleteAsync(task.Id,  task.IsCompleted));
 
             _viewmodel.ToggleTaskIsCompletedCommand.Execute(task);
 
-            _taskServicesMock.Verify(ser => ser.UpdateAsync(
-                task.Id,
-                task.Title,
-                task.Description,
-                task.Deadline,
-                task.IsCompleted,
-                task.Priority,
-                task.CategoryId
-                ), Times.Once);
+            _taskServicesMock.Verify(ser => ser.UpdateIsCompleteAsync(task.Id, task.IsCompleted), Times.Once);
 
             Assert.True(task.IsCompleted);
         }
@@ -232,10 +313,10 @@ namespace TaskMasterPRO.Tests.ViewModel
         {
             var task = new Data.Domain.Task { Id = 1, IsCompleted = true };
 
-            _taskServicesMock.Setup(ser => ser.UpdateAsync(
-                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<DateTime>(), It.IsAny<bool>(), It.IsAny<Priority>(), It.IsAny<int>()
-            )).ThrowsAsync(new Exception("Database connection failed"));
+            _taskServicesMock.Setup(ser => ser
+                .UpdateIsCompleteAsync(It.IsAny<int>(),It.IsAny<bool>()))
+                .ThrowsAsync(new Exception("Database connection failed")
+            );
 
             _viewmodel.ToggleTaskIsCompletedCommand.Execute(task);
 
@@ -427,6 +508,7 @@ namespace TaskMasterPRO.Tests.ViewModel
         public void CanAddCategory_ReturnsTrue_WhenRequiredFieldsAreFilled()
         {
             _viewmodel.CategoryToAdd.Name = "New Category";
+            _viewmodel.CategoryToAdd.Description = "Description";
             _viewmodel.CategoryToAdd.Color = "#FFFFFF";
             Assert.True(_viewmodel.AddCategoryCommand.CanExecute(null));
         }

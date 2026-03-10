@@ -1,6 +1,7 @@
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using TaskMasterPRO.Data.Domain;
 using TaskMasterPRO.Data.Database;
+using TaskMasterPRO.Data.Domain;
 using TaskMasterPRO.Data.Repository;
 using Task = TaskMasterPRO.Data.Domain.Task;
 
@@ -11,16 +12,21 @@ namespace TaskMasterPRO.Tests.Repository
 
         private readonly TaskMasterPROContext _context;
         private readonly TaskRepository _repository;
+        private readonly SqliteConnection _connection;
 
         public TaskRepositoryTests()
         {
+            _connection = new SqliteConnection("DataSource=:memory:");
+            _connection.Open();
+
             var options = new DbContextOptionsBuilder<TaskMasterPROContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .UseSqlite(_connection)
                 .Options;
 
-            _context = new(options);
-            _repository = new(_context);
+            _context = new(options); 
+            _context.Database.EnsureCreated();
 
+            _repository = new(_context);
 
             PopulateDatabase();
         }
@@ -155,13 +161,31 @@ namespace TaskMasterPRO.Tests.Repository
             Assert.Equal(Priority.Medium, res.Priority);
         }
 
+        /*
+         * Update is completed
+         */
+
+        [Fact]
+        public async void UpdateTest_UpdateTaskIsCompleted()
+        {
+            int id = 1;
+            Task task = await _repository.GetAsync(id) ?? throw new Exception("Task not found");
+            Assert.False(task.IsCompleted);
+
+            await _repository.UpdateIsCompleteAsync(id, true);
+
+            Task updatedTask = await _repository.GetAsync(id) ?? throw new Exception("Task not found");
+
+            Assert.True(updatedTask.IsCompleted);
+        }
+
 
 
         /*
          * Delete
          */
 
-        [Fact]
+            [Fact]
         public async void DeleteTest_DeleteTask()
         {
             int id = 1;
