@@ -1,0 +1,80 @@
+﻿<UserControl x:Class="TaskMasterPRO.View.Components.FilterPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TaskMasterPRO.View.Components"
+             mc:Ignorable="d">
+    <Border 
+        Background="#A3B18A" 
+        CornerRadius="0,15,0,0"
+        Padding="0,5,5,0"
+        >
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Close Button -->
+
+            <StackPanel Grid.Column="1" Grid.Row="0" x:Name="closeButton">
+                <CheckBox
+                    x:Name="Button"
+                    IsChecked="True"
+                    Checked="OpenPanel"
+                    Unchecked="ClosePanel" 
+                    Cursor="Hand"
+                    >       
+                    <CheckBox.Template>
+                        <ControlTemplate TargetType="CheckBox">
+                            <Grid Background="Transparent">
+                                <Viewbox Width="16" Height="16">
+                                    <Path
+                                        Data="{StaticResource IconTriangle}"
+                                        Fill="Black"
+                                        Stretch="Fill" />
+                                </Viewbox>
+                            </Grid>
+                        </ControlTemplate>
+                    </CheckBox.Template>
+                </CheckBox>
+            </StackPanel>
+
+            <!-- Filter Options -->
+
+            <Border Grid.Column="0" Grid.Row="1" x:Name="content">
+                <StackPanel x:Name="innerContent">
+                    <StackPanel.RenderTransform>
+                        <TranslateTransform x:Name="contentTranslate" X="0" />
+                    </StackPanel.RenderTransform>
+                    
+                    <CheckBox 
+                         Content="Only Active"
+                         IsChecked="{Binding FilterPanel.ShowOnlyActive, UpdateSourceTrigger=PropertyChanged}"
+                         /> 
+
+                    <Separator Margin="0 10" />
+
+                    <local:FilterGroup 
+                         Header="Categories" 
+                         ItemsSource="{Binding FilterPanel.CategoryFilters}"
+                         />
+
+                    <Separator Margin="0 10" />
+
+                    <local:FilterGroup 
+                         Header="Priorities"
+                         ItemsSource="{Binding FilterPanel.PriorityFilters}"
+                         />
+                </StackPanel>
+            </Border>
+                
+        </Grid>
+    </Border>
+</UserControl>

@@ -4,12 +4,152 @@
              xmlns:local="clr-namespace:TaskMasterPRO"
              >
     <Application.Resources>
-        
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/Icons.xaml" />
             </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
 
+            <!-- Button style for icon buttons -->
+
+            <Style x:Key="IconButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}">
+                                <ContentPresenter VerticalAlignment="Center" 
+                                      HorizontalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Opacity" Value="0.6"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+
+
+            <!-- TextBox style for labeled input fields -->
+
+            <Style x:Key="LabeledTextBoxStyle" TargetType="TextBox">
+                <Setter Property="Background" Value="#D3D3D3"/>
+                <Setter Property="BorderBrush" Value="#444"/>
+                <Setter Property="Padding" Value="10,5"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TextBox">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" 
+                               Text="{TemplateBinding Tag}" 
+                               FontWeight="Bold" 
+                               Margin="0,0,0,5"/>
+
+                                <Border Grid.Row="1"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            ClipToBounds="True">
+                                    <ScrollViewer x:Name="PART_ContentHost" 
+                                      Padding="{TemplateBinding Padding}"
+                                      VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}"
+                                      HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}"/>
+                                </Border>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+
+
+            <!-- DatePicker style for labeled date input fields -->
+
+            <Style x:Key="LabeledDatePickerStyle" TargetType="DatePicker">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="DatePicker">
+                            <StackPanel>
+                                <TextBlock Text="{TemplateBinding Tag}" 
+                               FontWeight="Bold" Margin="0,0,0,5"/>
+
+                                <Border Background="#D3D3D3" BorderBrush="#444" 
+                            BorderThickness="1" CornerRadius="8" Padding="2">
+                                    <Grid x:Name="PART_Root">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <DatePickerTextBox x:Name="PART_TextBox" Grid.Column="0" 
+                                               Background="Transparent" BorderThickness="0" 
+                                               VerticalContentAlignment="Center" />
+                                        <Button x:Name="PART_Button" Grid.Column="1" Background="Transparent" BorderThickness="0"/>
+                                    </Grid>
+                                </Border>
+                                <Popup x:Name="PART_Popup" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" />
+                            </StackPanel>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+
+            <!-- ComboBox style for labeled dropdown fields -->
+
+            <Style x:Key="LabeledComboBoxStyle" TargetType="ComboBox">
+                <Setter Property="Background" Value="#D3D3D3"/>
+                <Setter Property="BorderBrush" Value="#444"/>
+                <Setter Property="Padding" Value="8,4"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ComboBox">
+                            <StackPanel>
+                                <TextBlock Text="{TemplateBinding Tag}" 
+                               FontWeight="Bold" Margin="0,0,0,5"/>
+
+                                <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1" CornerRadius="8">
+                                    <Grid>
+                                        <ToggleButton 
+                                          x:Name="ToggleButton" 
+                                          Background="Transparent" BorderThickness="0"
+                                          ClickMode="Press" Focusable="false"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                        <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False" 
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              Margin="10,3,30,3" VerticalAlignment="Center"/>
+                                        <Path x:Name="Arrow" Fill="Black" Data="M0,0 L4,4 L8,0 Z" 
+                                  HorizontalAlignment="Right" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Border>
+                                <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True">
+                                    <Border x:Name="DropDownBorder" Background="White" BorderBrush="Gray" BorderThickness="1" MinWidth="{TemplateBinding ActualWidth}">
+                                        <ScrollViewer Margin="4" SnapsToDevicePixels="True">
+                                            <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained" />
+                                        </ScrollViewer>
+                                    </Border>
+                                </Popup>
+                            </StackPanel>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

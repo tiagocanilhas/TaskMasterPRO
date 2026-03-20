@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Data;
+using System.Windows.Input;
 using TaskMasterPRO.Core;
 using TaskMasterPRO.Data.Domain;
 using TaskMasterPRO.Data.Services.Interfaces;
@@ -125,50 +126,68 @@ namespace TaskMasterPRO.ViewModel
         }
 
         /*
-         * Add Task Command
+         *  Manage Panel
          */
 
-        private Data.Domain.Task taskToAdd = new();
-        public Data.Domain.Task TaskToAdd
+        private object currentView;
+        public object CurrentView
         {
-            get => taskToAdd;
-            set
-            {
-                taskToAdd = value;
-                OnPropertyChanged();
+            get => currentView;
+            set { 
+                currentView = value; 
+                OnPropertyChanged(); 
             }
         }
 
-        public RelayCommand AddTaskCommand => new(async _ => await AddTask(), _ => CanAddTask());
 
-        private async Task AddTask()
+
+        public RelayCommand ShowAddTaskCommand => new(_ => ExecuteShowAddTask());
+        TaskAddFormViewModel taskAddvm = new(taskServices, dialogServices);
+
+        private void ExecuteShowAddTask()
         {
-            await ExecuteSafelyAsync(
-                action: async () =>
-                {
-                    var newTask = await taskServices.CreateAsync(
-                        taskToAdd.Title,
-                        taskToAdd.Description,
-                        taskToAdd.Deadline,
-                        false,
-                        taskToAdd.Priority,
-                        taskToAdd.CategoryId
-                     );
+            if (CurrentView is TaskAddFormViewModel)
+            {
+                CurrentView = null;
+                return;
+            }
 
-                    TaskToAdd = new();
+            taskAddvm.TaskCreated += (newTask) => {
+                Tasks.Add(newTask);
+                CurrentView = null;
+            };
 
-                    Tasks.Add(newTask);
-                },
-                onErrorRollback: () => { }
-            );
+            CurrentView = taskAddvm;
         }
 
-        private bool CanAddTask()
+
+
+        public RelayCommand ShowAddCategoryCommand => new (_ => ExecuteShowCategoryAdd());
+        CategoryAddFormViewModel categoryAddvm = new(categoryServices, dialogServices);
+
+        private void ExecuteShowCategoryAdd()
         {
-            bool hasValidTitle = !string.IsNullOrWhiteSpace(TaskToAdd.Title);
-            bool hasValidDeadline = TaskToAdd.Deadline > DateTime.Now;
-            bool hasValidCategory = TaskToAdd.CategoryId > 0;
-            return hasValidTitle && hasValidDeadline && hasValidCategory;
+            if (CurrentView is CategoryAddFormViewModel)
+            {
+                CurrentView = null;
+                return;
+            }
+
+            categoryAddvm.CategoryCreated += (newCategory) =>
+            {
+                Categories.Add(newCategory);
+
+                FilterPanel.CategoryFilters.Add(new FilterItem<Category>
+                {
+                    DisplayName = newCategory.Name,
+                    Item = newCategory,
+                    IsSelected = false
+                });
+
+                CurrentView = null;
+            };
+
+            CurrentView = categoryAddvm;
         }
 
 
@@ -233,53 +252,6 @@ namespace TaskMasterPRO.ViewModel
         private bool CanDeleteTask(Data.Domain.Task? task)
         {
             return task != null;
-        }
-
-
-
-        /*
-         * Add Category Command
-         */
-
-
-        private Category categoryToAdd = new();
-        public Category CategoryToAdd
-        {
-            get => categoryToAdd;
-            set
-            {
-                categoryToAdd = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public RelayCommand AddCategoryCommand => new(async _ => await AddCategory(), _ => CanAddCategory());
-
-        private async Task AddCategory()
-        {
-            var newCategory = await categoryServices.CreateAsync(
-                categoryToAdd.Name,
-                categoryToAdd.Description,
-                categoryToAdd.Color
-            );
-
-            CategoryToAdd = new();
-
-            Categories.Add(newCategory);
-            FilterPanel.CategoryFilters.Add(new FilterItem<Category>
-            {
-                DisplayName = newCategory.Name,
-                Item = newCategory,
-                IsSelected = false
-            });
-        }
-
-        private bool CanAddCategory()
-        {
-            bool hasValidName = !string.IsNullOrWhiteSpace(CategoryToAdd.Name);
-            bool hasValidDescription = !string.IsNullOrWhiteSpace(CategoryToAdd.Description);
-            bool hasValidColor = !string.IsNullOrWhiteSpace(CategoryToAdd.Color);
-            return hasValidName && hasValidDescription && hasValidColor;
         }
     }
 }

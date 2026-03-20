@@ -27,24 +27,11 @@
                     CommandParameter="{Binding}"
                     />
 
-                <Button 
-                    HorizontalAlignment="Left" 
-                    Background="Transparent" 
-                    BorderThickness="0" 
-                    Cursor="Hand" 
-                    Height="18"
+                <Button
+                    Style="{StaticResource IconButtonStyle}"
                     Command="{Binding OnDeleteClickCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     CommandParameter="{Binding}"
                     >
-                    
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border Background="Transparent">
-                                <ContentPresenter VerticalAlignment="Center"/>
-                            </Border>
-                        </ControlTemplate>
-                    </Button.Template>
-                    
                     <Path 
                         Fill="#FF5252"
                         Stretch="Uniform"

@@ -7,172 +7,79 @@
         xmlns:domain="clr-namespace:TaskMasterPRO.Data.Domain"
         xmlns:ext="clr-namespace:TaskMasterPRO.Extensions"
         xmlns:viewmodel="clr-namespace:TaskMasterPRO.ViewModel"
-        xmlns:components="clr-namespace:TaskMasterPRO.View.Components"
+        xmlns:views="clr-namespace:TaskMasterPRO.View.Components"
         d:DataContext="{d:DesignInstance Type=viewmodel:MainViewModel}"
         mc:Ignorable="d"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="720" Width="1280">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0" Margin="10">
-            <TextBlock Text="Search by Title:"/>
-            <TextBox Text="{Binding FilterPanel.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+        <Grid.Resources>
+            <DataTemplate DataType="{x:Type viewmodel:TaskAddFormViewModel}">
+                <views:TaskAddForm />
+            </DataTemplate>
 
-            <CheckBox 
-                Content="Only Active"
-                IsChecked="{Binding FilterPanel.ShowOnlyActive, UpdateSourceTrigger=PropertyChanged}"
-                />
+            <DataTemplate DataType="{x:Type viewmodel:CategoryAddFormViewModel}">
+                <views:CategoryAddForm />
+            </DataTemplate>
+        </Grid.Resources>
 
-            <Separator Margin="0 10" />
+        <views:FilterPanel Grid.Column="0" />
 
-            <components:FilterGroup 
-                Header="Categories" 
-                ItemsSource="{Binding FilterPanel.CategoryFilters}"
-                />
+        <Grid Grid.Column="1" Background="LightGray" Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-            <Separator Margin="0 10" />
-
-            <components:FilterGroup 
-                Header="Priorities"
-                ItemsSource="{Binding FilterPanel.PriorityFilters}"
-                />
-        </StackPanel>
-
-        <Grid Grid.Column="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="250" />
-            </Grid.ColumnDefinitions>
-
-            <Grid Grid.Column="0" Background="LightGray" Margin="10">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-
-                <TextBlock 
+            <TextBlock 
                     Grid.Row="0"
                     Text="Task List" 
                     FontSize="16" 
                     FontWeight="Bold" 
                 />
 
-                <ListBox 
+            <ListBox 
                     Grid.Row="1"
                     ItemsSource="{Binding TasksView}" 
                     Background="Transparent" 
                     BorderThickness="0"
                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                 >
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <components:TaskCard 
-                                OnIsCompletedClickCommand="{Binding DataContext.ToggleTaskIsCompletedCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                OnDeleteClickCommand="{Binding DataContext.DeleteTaskCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                />
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-
-                    <ListBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal" />
-                        </ItemsPanelTemplate>
-                    </ListBox.ItemsPanel>
-                </ListBox>
-            </Grid>
-
-            <Grid Grid.Column="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="0.5*" />
-                    <RowDefinition Height="0.5*" />
-                </Grid.RowDefinitions>
-
-                <StackPanel Grid.Row="0" Background="LightGray" Margin="10" >
-                    <TextBlock Text="Add Task" FontSize="16" FontWeight="Bold"/>
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="5" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-
-                        <TextBlock Grid.Column="0" Grid.Row="0" Text="Title" />
-                        <TextBox Grid.Column="3" Grid.Row="0" Text="{Binding TaskToAdd.Title, UpdateSourceTrigger=PropertyChanged}" />
-
-                        <TextBlock Grid.Column="0" Grid.Row="1" Text="Description" />
-                        <TextBox Grid.Column="3" Grid.Row="1" Text="{Binding TaskToAdd.Description, UpdateSourceTrigger=PropertyChanged}" />
-
-                        <TextBlock Grid.Column="0" Grid.Row="2" Text="Deadline" />
-                        <DatePicker Grid.Column="3" Grid.Row="2" SelectedDate="{Binding TaskToAdd.Deadline, UpdateSourceTrigger=PropertyChanged}" />
-
-                        <TextBlock Grid.Column="0" Grid.Row="3" Text="Priority" />
-                        <ComboBox 
-                            Grid.Column="3"
-                            Grid.Row="3" 
-                            Text="{Binding TaskToAdd.Priority, UpdateSourceTrigger=PropertyChanged}" 
-                            ItemsSource="{Binding Source={ext:EnumBinding {x:Type domain:Priority}}}"
-                        />
-
-                        <TextBlock Grid.Column="0" Grid.Row="4" Text="Category" />
-                        <ComboBox 
-                            Grid.Column="3"
-                            Grid.Row="4" 
-                            ItemsSource="{Binding Categories}"
-                            DisplayMemberPath="Name"
-                            SelectedValuePath="Id"
-                            SelectedValue="{Binding TaskToAdd.CategoryId, UpdateSourceTrigger=PropertyChanged}"
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <views:TaskCard 
+                            OnIsCompletedClickCommand="{Binding DataContext.ToggleTaskIsCompletedCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                            OnDeleteClickCommand="{Binding DataContext.DeleteTaskCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                             />
-                    </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
 
-                    <Button Content="Add Task" Command="{Binding AddTaskCommand}"/>
-                </StackPanel>
-
-                <StackPanel Grid.Row="1" Background="LightGray" Margin="10">
-                    <TextBlock Text="Add Category" FontSize="16" FontWeight="Bold"/>
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="5" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Name" VerticalAlignment="Center"/>
-                        <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding CategoryToAdd.Name, UpdateSourceTrigger=PropertyChanged}"/>
-
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Description" VerticalAlignment="Center"/>
-                        <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding CategoryToAdd.Description, UpdateSourceTrigger=PropertyChanged}"/>
-
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Color" VerticalAlignment="Center"/>
-                        <xctk:ColorPicker 
-                            Grid.Row="2" Grid.Column="2"
-                            SelectedColor="{Binding CategoryToAdd.Color}" 
-                            DisplayColorAndName="True" 
-                            AvailableColorsHeader="Cores Disponíveis" 
-                            />
-                    </Grid>
-
-                    <Button Content="Add Category" Command="{Binding AddCategoryCommand}" Margin="0,10,0,0"/>
-                </StackPanel>
-
-            </Grid>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+            </ListBox>
         </Grid>
+
+        <views:ManagePanel Grid.Column="2"/>
+
+        <Border
+            x:Name="content"
+            Grid.Column="3" 
+            >
+            <ContentControl 
+                x:Name="innerContent"
+                Content="{Binding CurrentView, NotifyOnTargetUpdated=True}"
+                Binding.TargetUpdated="OnViewChanged"
+                />
+        </Border>
     </Grid>
 </Window>
